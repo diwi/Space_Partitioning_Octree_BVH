@@ -1,0 +1,80 @@
+//----------------------------------------------------------------------------------------
+// this worked on my mychine winXP, x86, Java 1.6.24
+
+1) Import   
+  - core.jar
+  - gluegen-rt.jar
+  - jogl.jar
+  - opengl.jar
+  
+2) then add them to the build path.
+
+3) make a subfolder and put jogl.dll, jogl_awt.dll there
+
+3) Right click on jogl.jar in eclipse and goto 
+   properties under native libraries click on external folder 
+   and select the folder you just created.
+   
+   
+   
+   
+   
+   
+//----------------------------------------------------------------------------------------
+
+1) Import core.jar opengl.jar and jogl.jar, then add them to the build path.
+2) Extract all the native jogl jars in the opengl directory to a separate directory.
+3) Right click on jogl.jar in eclipse and goto 
+   properties under native libraries click on external folder 
+   and select the folder you extracted all the native opengl stuff to.
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------
+1. Create a new Java project
+2. Right click on the project root and add a new folder named "lib".
+3. Right click on your new folder and create a new folder inside of it called "opengl-natives".
+4. Right-click on your "lib" folder and choose "Import".
+5. Browse to your "Processing\lib" folder and import the following file:
+
+  - core.jar
+
+6. Right-click on your "lib" folder and choose "Import".
+7. Browse to your "Processing\libraries\opengl\library" folder and import the following files:
+
+  - gluegen-rt.jar
+  - jogl.jar
+  - opengl.jar
+
+8. Right-click on your "opengl-natives" (which is inside your "lib" folder) and choose "Import".
+9. Browse to your "Processing\libraries\opengl\library" folder and import *ALL* files, *EXCEPT* the following:
+
+  - gluegen-rt.jar
+  - jogl.jar
+  - opengl.jar
+
+10. In your project's "lib" folder, right-click "gluegen-rt.jar" and choose "Properties".
+11. Under "Native Library", click "Workspace" and browse to "YourProjectName/lib/opengl-natives" and click "OK".
+12. In your project's "lib" folder, right-click "jogl.jar" and choose "Properties".
+13. Under "Native Library", click "Workspace" and browse to "YourProjectName/lib/opengl-natives" and click "OK".
+14. Run this as your main class:
+
+import processing.core.*;
+import processing.opengl.*;
+import javax.media.opengl.GL;
+
+@SuppressWarnings("serial")
+public class MyApp extends PApplet
+{
+
+    public void setup()
+    {
+
+         size(800, 600, OPENGL);
+
+    }
+
+}

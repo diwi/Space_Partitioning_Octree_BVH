@@ -1,0 +1,43 @@
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR: Thomas Diewald
+
+Date:        07.02.2013
+last edited: 07.02.2013
+
+author:     www.thomasdiewald.com
+blog-post:  www.thomasdiewald.com/blog/?p=1488
+source:     www.github.com/diwi/Space_Partitioning
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+
+
+################################################################################
+--------------------------------------------------------------------------------
+Space Partitioning: Octree vs. BVH
+--------------------------------------------------------------------------------
+################################################################################
+
+source code of my first experiments with space-partitioning techniques: 
+
+ - Octree
+ - BVH
+
+ 
+it was a study to compare performance and usage for raytracing/pathtracing.
+most important for me was the traversing-performance for ray-triangle-intersection,
+which i needed for the opencl-implementation.
+in the end i decided to use the BVH for that, and so the octree functionality 
+might be not that "perfect".
+
+a lot of things should/could be improved during building the data-structure.
+at the moment it is way to slow for dynamic changes in the scene.
+if you notice any errors, feel free to contact me.
+
+
+for more information, i'd like to refer to my blog-post:
+http://thomasdiewald.com/blog/?p=1488
+
+thomas
+

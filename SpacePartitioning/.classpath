@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/processing_core_1.5.1/core.jar"/>
+	<classpathentry kind="lib" path="lib/peasycam/PeasyCam.jar"/>
+	<classpathentry kind="lib" path="lib/processing_1.5.1_opengl/library/gluegen-rt.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SpacePartitioning/lib/processing_1.5.1_opengl/library/windows32"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/processing_1.5.1_opengl/library/jogl.jar"/>
+	<classpathentry kind="lib" path="lib/processing_1.5.1_opengl/library/opengl.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
