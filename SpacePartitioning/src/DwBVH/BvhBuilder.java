@@ -1,7 +1,7 @@
 /**
  * 
  *   author: (c)thomas diewald, http://thomasdiewald.com/
- *   date: 12.09.2012
+ *   date: 19.02.2014
  *   
  *
  * This source is free software; you can redistribute it and/or modify
@@ -38,27 +38,22 @@ public class BvhBuilder {
   private BvhNodeT root;
   private DwOBJ_File obj;
   
-  private final Comparator<Integer> sort_X0 = new SortByX0();
-  private final Comparator<Integer> sort_Y0 = new SortByY0();
-  private final Comparator<Integer> sort_Z0 = new SortByZ0();
-  
-  private final Comparator<Integer> sort_X1 = new SortByX1();
-  private final Comparator<Integer> sort_Y1 = new SortByY1();
-  private final Comparator<Integer> sort_Z1 = new SortByZ1();
-  
-  private final Comparator<Integer> sort_X2 = new SortByX2();
-  private final Comparator<Integer> sort_Y2 = new SortByY2();
-  private final Comparator<Integer> sort_Z2 = new SortByZ2();
-  
-  
+  private final SortBy_AABBmax    sort_aabb_max;   
+  private final SortBy_AABBcenter sort_aabb_center;
+  private final SortBy_facecenter sort_face_center;
+
+
   public int MIN_ITEM_COUNT   = 1;
   public int MAX_DEPTH        = 15;
   public int SAH_OPTIMIZATION = 0; // 0, 1, 2
 
   public BvhBuilder(Bvh bvh){
-//    this.bvh  = bvh;
     this.root = bvh.root;
     this.obj  = bvh.obj;
+    
+    sort_aabb_max    = new SortBy_AABBmax(obj);
+    sort_aabb_center = new SortBy_AABBcenter(obj);
+    sort_face_center = new SortBy_facecenter(obj);;
   }
 
   public void BUILD_defaultRoutine(){
@@ -83,23 +78,31 @@ public class BvhBuilder {
     
     float SAH = Float.MAX_VALUE;
 
-    // abb max
-    Collections.sort( node._getObjects(), sort_X0 ); SAH = genChildSubsets(SAH, node, subset_A, subset_B);
-    Collections.sort( node._getObjects(), sort_Y0 ); SAH = genChildSubsets(SAH, node, subset_A, subset_B);
-    Collections.sort( node._getObjects(), sort_Z0 ); SAH = genChildSubsets(SAH, node, subset_A, subset_B);
+    // find best SAH
     
-    // abb center
-    if( SAH_OPTIMIZATION >= 1) {
-      Collections.sort( node._getObjects(), sort_X1 ); SAH = genChildSubsets(SAH,  node, subset_A, subset_B);
-      Collections.sort( node._getObjects(), sort_Y1 ); SAH = genChildSubsets(SAH,  node, subset_A, subset_B);
-      Collections.sort( node._getObjects(), sort_Z1 ); SAH = genChildSubsets(SAH,  node, subset_A, subset_B);
+    // 1) aabb max
+    for(int i = 0; i < 3; i++){
+      sort_aabb_max.dim(i);
+      Collections.sort( node._getObjects(), sort_aabb_max ); 
+      SAH = genChildSubsets(SAH, node, subset_A, subset_B);
     }
-    
-    // face center
+
+    // 2) aabb center
+    if( SAH_OPTIMIZATION >= 1) {
+      for(int i = 0; i < 3; i++){
+        sort_aabb_center.dim(i);
+        Collections.sort( node._getObjects(), sort_aabb_center ); 
+        SAH = genChildSubsets(SAH, node, subset_A, subset_B);
+      }
+    }
+
+    // 3) face center
     if( SAH_OPTIMIZATION >= 2) {
-      Collections.sort( node._getObjects(), sort_X2 ); SAH = genChildSubsets(SAH, node, subset_A, subset_B);
-      Collections.sort( node._getObjects(), sort_Y2 ); SAH = genChildSubsets(SAH, node, subset_A, subset_B);
-      Collections.sort( node._getObjects(), sort_Z2 ); SAH = genChildSubsets(SAH, node, subset_A, subset_B);
+      for(int i = 0; i < 3; i++){
+        sort_face_center.dim(i);
+        Collections.sort( node._getObjects(), sort_face_center ); 
+        SAH = genChildSubsets(SAH, node, subset_A, subset_B);
+      }
     }
 
     node.deleteObjects(); // node.IDX_triangles.clear();
@@ -176,42 +179,62 @@ public class BvhBuilder {
   
   
   
-  
-  
-  
-
   //----------------------------------------------------------------------------
   // SORTING:  aabb.max .... !FASTEST! for building/traversing
-  private final class SortByX0 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].aabb.max[0]>=obj.f[b].aabb.max[0])?1:-1; }
+  private final static class SortBy_AABBmax implements Comparator<Integer>{
+    final DwOBJ_File obj;
+    int dim;
+    public SortBy_AABBmax(DwOBJ_File obj){
+      this.obj = obj;
+    }
+    public void dim(int dim){
+      this.dim = dim;
+    }
+    @Override public int compare( Integer a, Integer b ) {
+      float r = obj.f[a].aabb.max[dim] - obj.f[b].aabb.max[dim];
+      if( r > 0 ) return +1;
+      if( r < 0 ) return -1;
+      return 0;
+    }
   }
-  private final class SortByY0 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].aabb.max[1]>=obj.f[b].aabb.max[1])?1:-1; }
-  }
-  private final class SortByZ0 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].aabb.max[2]>=obj.f[b].aabb.max[2])?1:-1; }
-  }
-//----------------------------------------------------------------------------
-  //SORTING:  aabb.center .... !FASTEST! for building/traversing
-  private final class SortByX1 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].aabb.getCenter()[0]>obj.f[b].aabb.getCenter()[0])?1:-1; }
-  }
-  private final class SortByY1 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].aabb.getCenter()[1]>obj.f[b].aabb.getCenter()[1])?1:-1; }
-  }
-  private final class SortByZ1 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].aabb.getCenter()[2]>obj.f[b].aabb.getCenter()[2])?1:-1; }
-  }
+  
   //----------------------------------------------------------------------------
-  //SORTING:  face.center .... !FASTEST! for building/traversing
-  private final class SortByX2 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].getCenter()[0]>obj.f[b].getCenter()[0])?1:-1; }
+  // SORTING:  aabb.center .... !FASTEST! for building/traversing
+  private final static class SortBy_AABBcenter implements Comparator<Integer>{
+    final DwOBJ_File obj;
+    int dim;
+    public SortBy_AABBcenter(DwOBJ_File obj){
+      this.obj = obj;
+    }
+    public void dim(int dim){
+      this.dim = dim;
+    }
+    @Override public int compare( Integer a, Integer b ) {
+      float r = obj.f[a].aabb.getCenter()[dim] - obj.f[b].aabb.getCenter()[dim];
+      if( r > 0 ) return +1;
+      if( r < 0 ) return -1;
+      return 0;
+    }
   }
-  private final class SortByY2 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].getCenter()[1]>obj.f[b].getCenter()[1])?1:-1; }
-  }
-  private final class SortByZ2 implements Comparator<Integer>{
-    @Override public int compare( Integer a, Integer b ) {  return (obj.f[a].getCenter()[2]>obj.f[b].getCenter()[2])?1:-1; }
+
+  
+  //----------------------------------------------------------------------------
+  // SORTING:  face.center .... !FASTEST! for building/traversing
+  private final static class SortBy_facecenter implements Comparator<Integer>{
+    final DwOBJ_File obj;
+    int dim;
+    public SortBy_facecenter(DwOBJ_File obj){
+      this.obj = obj;
+    }
+    public void dim(int dim){
+      this.dim = dim;
+    }
+    @Override public int compare( Integer a, Integer b ) {
+      float r = obj.f[a].getCenter()[dim] - obj.f[b].getCenter()[dim];
+      if( r > 0 ) return +1;
+      if( r < 0 ) return -1;
+      return 0;
+    }
   }
 
 
